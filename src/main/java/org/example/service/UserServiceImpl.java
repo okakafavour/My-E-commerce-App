@@ -1,0 +1,50 @@
+package org.example.service;
+
+import org.example.data.model.User;
+import org.example.data.repository.UserRepository;
+import org.example.dto.request.LoginRequest;
+import org.example.dto.request.RegisterRequest;
+import org.example.dto.response.LoginResponse;
+import org.example.dto.response.RegisterResponse;
+import org.example.exception.InvalidPasswordException;
+import org.example.exception.UserNotFoundException;
+import org.example.util.Mapper;
+import org.example.util.PasswordHashingMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserServiceImpl implements UserService{
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    Mapper mapper;
+
+    private PasswordEncoder passwordEncoder;
+
+    public RegisterResponse register(RegisterRequest request) {
+        User user = mapper.mapToUser(request);
+        String hashedPassword = PasswordHashingMapper.hashPassword(user.getPassword());
+        user.setPassword(hashedPassword);
+        userRepository.save(user);
+        return mapper.mapToRegisterResponse(user);
+    }
+
+    public LoginResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        boolean passwordMatch = PasswordHashingMapper.checkPassword(request.getPassword(), user.getPassword());
+        if (!passwordMatch) {
+            throw new InvalidPasswordException("Invalid password");
+        }
+
+        LoginResponse response = new LoginResponse();
+        response.setMessage("Login Successfully");
+        return response;
+    }
+
+
+}
