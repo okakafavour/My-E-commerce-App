@@ -1,6 +1,6 @@
 package org.example.enums;
 
-public enum OrderStatus {
+public enum Status {
     PENDING,
     PROCESSING,
     SHIPPING,

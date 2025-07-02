@@ -1,7 +1,7 @@
 package org.example.data.model;
 
 import lombok.Data;
-import org.example.enums.OrderStatus;
+import org.example.enums.Status;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -14,7 +14,7 @@ public class Order {
     private String customerId;
     private List<OrderItems> items;
     private double totalPrice;
-    private OrderStatus status;
+    private Status status;
     private String deliveryAddress;
     private LocalDateTime createdAt = LocalDateTime.now();
 }
