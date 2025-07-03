@@ -2,9 +2,7 @@ package org.example.service;
 
 import org.example.data.model.User;
 import org.example.data.repository.UserRepository;
-import org.example.dto.request.CustomerRegisterRequest;
 import org.example.dto.request.RegisterRequest;
-import org.example.dto.response.RegisterResponse;
 import org.example.enums.Role;
 import org.example.exception.InvalidCustomerException;
 import org.junit.jupiter.api.Test;
@@ -20,17 +18,22 @@ class CustomersServiceImplTest {
    CustomersService customersService;
 
     @Autowired
+    UserServiceImpl userService;
+
+    @Autowired
     UserRepository userRepository;
 
     @Test
     public void testForCustomerToUpdateProfile(){
-        CustomerRegisterRequest request = new CustomerRegisterRequest();
-        request.setFirstName("Thank");
-        request.setLastName("grace");
-        request.setEmail("grace12@gmail.com");
-        request.setPassword("boladada");
-        request.setRole(Role.CUSTOMER);
-        customersService.register(request);
+        RegisterRequest CustomerRequest = new RegisterRequest();
+        CustomerRequest.setFirstName("Thank");
+        CustomerRequest.setLastName("grace");
+        CustomerRequest.setEmail("grace12@gmail.com");
+        CustomerRequest.setPhoneNumber("09123456789");
+        CustomerRequest.setPassword("boladada");
+        CustomerRequest.setRole(Role.CUSTOMER);
+        CustomerRequest.setEnable(true);
+        userService.register(CustomerRequest);
 
         RegisterRequest updateRequest = new RegisterRequest();
         updateRequest.setEmail("grace12@gmail.com");

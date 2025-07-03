@@ -32,23 +32,6 @@ public class CustomersServiceImpl implements CustomersService{
     CustomerRepository customerRepository;
 
     @Override
-    public CustomerRegisterResponse register(CustomerRegisterRequest request) {
-        User user = CustomerMapper.toUserEntity(request);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-
-        Customer customer = CustomerMapper.toCustomerEntity(request, user.getId());
-        customerRepository.save(customer);
-
-        return CustomerMapper.toResponse(customer, String.valueOf(user));
-    }
-
-    @Override
-    public CustomerLoginResponse login(CustomerLoginRequest request) {
-        return null;
-    }
-
-    @Override
     public Customer findCustomerByEmail(String email) {
         return customerRepository.findByEmail(email)
                 .orElseThrow(()-> new RuntimeException("customer not found"));

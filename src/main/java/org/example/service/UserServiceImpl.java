@@ -7,11 +7,16 @@ import org.example.dto.request.RegisterRequest;
 import org.example.dto.response.LoginResponse;
 import org.example.dto.response.RegisterResponse;
 import org.example.exception.InvalidPasswordException;
+import org.example.exception.InvalidUserException;
 import org.example.exception.UserNotFoundException;
 import org.example.util.Mapper;
 import org.example.util.PasswordHashingMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+import static org.example.validation.validations.*;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -23,6 +28,20 @@ public class UserServiceImpl implements UserService{
 
 
     public RegisterResponse register(RegisterRequest request) {
+
+        String validPhoneNumber = validatePhoneNumber(request.getPhoneNumber());
+        String validFirstName = validateName(request.getFirstName());
+        String validEmail = validateEmail(request.getEmail());
+        String validLastName = validateName(request.getLastName());
+
+        request.setFirstName(validFirstName);
+        request.setPhoneNumber(validPhoneNumber);
+        request.setEmail(validEmail);
+        request.setLastName(validLastName);
+
+        Optional<User> exitingUser = userRepository.findByEmail(request.getEmail());
+        if(exitingUser.isPresent()) throw new InvalidUserException("User already exist");
+
         User user = mapper.mapToUser(request);
         String hashedPassword = PasswordHashingMapper.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);

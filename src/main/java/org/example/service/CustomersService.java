@@ -10,8 +10,6 @@ import org.example.dto.response.CustomerRegisterResponse;
 import java.util.List;
 
 public interface CustomersService {
-    CustomerRegisterResponse register(CustomerRegisterRequest request);
-    CustomerLoginResponse login(CustomerLoginRequest request);
     Customer findCustomerByEmail(String email);
     void updateProfile(RegisterRequest request);
     void addToCart(String userId, String productId);

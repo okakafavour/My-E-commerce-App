@@ -4,4 +4,5 @@ import lombok.Data;
 
 @Data
 public class CustomerRegisterRequest extends UserDto{
+    private String address;
 }
