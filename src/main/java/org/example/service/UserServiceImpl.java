@@ -11,7 +11,6 @@ import org.example.exception.UserNotFoundException;
 import org.example.util.Mapper;
 import org.example.util.PasswordHashingMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,7 +21,6 @@ public class UserServiceImpl implements UserService{
     @Autowired
     Mapper mapper;
 
-    private PasswordEncoder passwordEncoder;
 
     public RegisterResponse register(RegisterRequest request) {
         User user = mapper.mapToUser(request);
@@ -37,9 +35,7 @@ public class UserServiceImpl implements UserService{
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         boolean passwordMatch = PasswordHashingMapper.checkPassword(request.getPassword(), user.getPassword());
-        if (!passwordMatch) {
-            throw new InvalidPasswordException("Invalid password");
-        }
+        if (!passwordMatch) throw new InvalidPasswordException("Invalid password");
 
         LoginResponse response = new LoginResponse();
         response.setMessage("Login Successfully");

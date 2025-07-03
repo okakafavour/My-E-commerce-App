@@ -4,10 +4,11 @@ import org.example.data.model.Admin;
 import org.example.data.repository.AdminRepository;
 import org.example.data.repository.UserRepository;
 import org.example.dto.request.AdminLoginRequest;
-import org.example.dto.response.AdminLoginResponse;
+import org.example.dto.response.LoginResponse;
 import org.example.dto.response.OrderResponse;
 import org.example.dto.response.ProductResponse;
 import org.example.enums.Role;
+import org.example.exception.InvalidPasswordException;
 import org.example.util.PasswordHashingMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,8 +39,15 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public AdminLoginResponse login(AdminLoginRequest request) {
-        return null;
+    public LoginResponse login(AdminLoginRequest request) {
+        Admin admin = adminRepository.findByEmail(request.getEmail());
+
+        boolean passwordMatch = PasswordHashingMapper.checkPassword(request.getPassword(), admin.getPassword());
+        if(!passwordMatch) throw new InvalidPasswordException("Invalid password");
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setMessage("Login Successfully");
+        return loginResponse;
     }
 
     @Override
