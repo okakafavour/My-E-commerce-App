@@ -6,21 +6,16 @@ import org.example.data.repository.CustomerRepository;
 import org.example.data.repository.OrderRepository;
 import org.example.data.repository.UserRepository;
 import org.example.dto.request.CartRequest;
-import org.example.dto.request.CustomerLoginRequest;
-import org.example.dto.request.CustomerRegisterRequest;
 import org.example.dto.request.RegisterRequest;
 import org.example.dto.response.CartResponse;
-import org.example.dto.response.CustomerLoginResponse;
-import org.example.dto.response.CustomerRegisterResponse;
+import org.example.dto.response.OrderResponse;
 import org.example.exception.InvalidCustomerException;
 import org.example.exception.UserNotFoundException;
-import org.example.util.CustomerMapper;
 import org.example.util.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.xml.crypto.Data;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +106,7 @@ public class CustomersServiceImpl implements CustomersService{
     }
 
     @Override
-    public void placeOrder(String customerId) {
+    public OrderResponse placeOrder(String customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(()-> new InvalidCustomerException("customer not found"));
 
@@ -131,6 +126,13 @@ public class CustomersServiceImpl implements CustomersService{
 
         customer.setCartItems(new ArrayList<>());
         customerRepository.save(customer);
+
+        OrderResponse response = new OrderResponse();
+        response.setOrderId(order.getId());
+        response.setTotalPrice(totalPrice);
+        response.setItemCount(cartItems.size());
+        response.setOrderDate(order.getOrderDate());
+        return response;
     }
 
 

@@ -10,8 +10,11 @@ import java.util.List;
 public class OrderResponse {
     private String userId;
     private String productId;
+    private String orderId;
     private List<Item> items;
     private double totalPrice;
-    private LocalDateTime createdAt;
+    private int itemCount;
+    private LocalDateTime orderDate;
     private String deliveryAddress;
+
 }
