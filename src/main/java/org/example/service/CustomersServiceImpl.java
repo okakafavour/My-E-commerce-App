@@ -1,21 +1,27 @@
 package org.example.service;
 
-import org.example.data.model.Customer;
-import org.example.data.model.User;
+import org.example.data.model.*;
+import org.example.data.repository.CartRepository;
 import org.example.data.repository.CustomerRepository;
+import org.example.data.repository.OrderRepository;
 import org.example.data.repository.UserRepository;
+import org.example.dto.request.CartRequest;
 import org.example.dto.request.CustomerLoginRequest;
 import org.example.dto.request.CustomerRegisterRequest;
 import org.example.dto.request.RegisterRequest;
+import org.example.dto.response.CartResponse;
 import org.example.dto.response.CustomerLoginResponse;
 import org.example.dto.response.CustomerRegisterResponse;
 import org.example.exception.InvalidCustomerException;
 import org.example.exception.UserNotFoundException;
 import org.example.util.CustomerMapper;
+import org.example.util.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +31,12 @@ public class CustomersServiceImpl implements CustomersService{
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    CartRepository cartRepository;
+
+    @Autowired
+    OrderRepository orderRepository;
 
     private PasswordEncoder passwordEncoder;
 
@@ -49,32 +61,42 @@ public class CustomersServiceImpl implements CustomersService{
     }
 
 
-    @Override
-    public void addToCart(String customerId, String productId) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(()-> new InvalidCustomerException(" customer not found"));
+    public CartResponse addToCart(CartRequest request) {
+        CartItems item = Mapper.mapToCartItems(request);
 
-        List<String> cart = customer.getCartId() == null || customer.getCartId().isEmpty()
-                ? new ArrayList<>()
-                : new ArrayList<>(List.of(customer.getCartId().split(",")));
-
-        cart.add(productId);
-        customer.setCartId(String.join(",", cart));
-        customerRepository.save(customer);
+        Cart cart = new Cart();
+        cart.setUserId(request.getUserId());
+        cart.setItems(List.of(item));
+        cart.setTotalPrice(item.getItemDetails().getPrice() * item.getItemDetails().getQuantity());
+        cartRepository.save(cart);
+        return Mapper.mapToCartItemsResponse(cart);
     }
 
+
     @Override
-    public void removeFromCart(String customerId, String productId) {
+    public CartResponse removeFromCart(String customerId, String productId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(()-> new InvalidCustomerException("customer not found"));
+                .orElseThrow(() -> new InvalidCustomerException("Customer not found"));
 
-        List<String> cart = customer.getCartId() == null || customer.getCartId().isEmpty()
-                ? new ArrayList<>()
-                : new ArrayList<>(List.of(customer.getCartId().split(",")));
+        List<Item> items = customer.getItems();
+        if (items == null) {
+            items = new ArrayList<>();
+        }
 
-        cart.remove(productId);
-        customer.setCartId(String.join(",", cart));
+        items.removeIf(item -> item.getId().equals(productId));
+
+        customer.setItems(items);
         customerRepository.save(customer);
+
+        double totalPrice = items.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+
+        CartResponse response = new CartResponse();
+        response.setItems(items);
+        response.setTotalPrice(totalPrice);
+
+        return response;
     }
 
     @Override
@@ -83,15 +105,34 @@ public class CustomersServiceImpl implements CustomersService{
                 .orElseThrow(()-> new InvalidCustomerException("customer not found"));
 
         boolean emptyCart = customer.getCartId() == null || customer.getCartId().isEmpty();
-        if(emptyCart) new ArrayList<>();
+        if(emptyCart) return new ArrayList<>();
 
         return new ArrayList<>(List.of(customer.getCartId().split(",")));
     }
 
     @Override
-    public void placeOrder(String userId) {
-        
+    public void placeOrder(String customerId) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(()-> new InvalidCustomerException("customer not found"));
+
+        List<Item> cartItems = customer.getCartItems();
+        if(cartItems.isEmpty()) throw new IllegalArgumentException("cart is empty");
+
+        double totalPrice = cartItems.stream()
+                .mapToDouble(Item::getTotalPrice)
+                .sum();
+
+        Order order = new Order();
+        order.setCustomerId(customerId);
+        order.setItems(cartItems);
+        order.setTotalPrice(totalPrice);
+        order.setOrderDate(LocalDateTime.now());
+        orderRepository.save(order);
+
+        customer.setCartItems(new ArrayList<>());
+        customerRepository.save(customer);
     }
+
 
     @Override
     public List<String> viewOrders(String userId) {

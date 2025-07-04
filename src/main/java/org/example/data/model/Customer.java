@@ -10,7 +10,8 @@ import java.util.List;
 public class Customer extends User{
     private List<String> orderId;
     private List<String> orderHistory;
-    private List<String> cartItems;
+    private List<Item> cartItems;
+    private List<Item> items;
     private String cartId;
     private String shippingAddress;
 

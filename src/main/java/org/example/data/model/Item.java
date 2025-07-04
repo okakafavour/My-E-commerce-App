@@ -2,20 +2,22 @@ package org.example.data.model;
 
 import lombok.Data;
 import org.example.enums.Status;
+import org.springframework.data.annotation.Transient;
 
-import java.beans.Transient;
 
 @Data
 public class Item {
-    private String productId;
-    private String productName;
+    private String Id;
     private String description;
     private double price;
     private int quantity;
     private Status status;
+    private String productName;
 
     @Transient
-    public double TotalPrice(){
+    public double getTotalPrice(){
         return quantity * price;
     }
+
+
 }

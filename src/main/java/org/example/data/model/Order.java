@@ -12,9 +12,13 @@ import java.util.List;
 public class Order {
     private String id;
     private String customerId;
-    private List<OrderItems> items;
+    private List<Item> items;
     private double totalPrice;
     private Status status;
+    private boolean shipped;
+    private String deliveryStatus;
     private String deliveryAddress;
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime orderDate = LocalDateTime.now();
+
+
 }

@@ -37,7 +37,7 @@ public class CartServiceImpl implements CartService{
         Cart cart = cartRepository.findById(userId)
                 .orElseThrow(()-> new UserNotFoundException(" user not found"));
         List<CartItems> items = cart.getItems();
-        items.removeIf(item -> item.getProductId().equals(productId));
+        items.removeIf(item -> item.getId().equals(productId));
 
         Cart updatedCart = cartRepository.save(cart);
         return mapToCartItemsResponse(updatedCart);
@@ -59,7 +59,7 @@ public class CartServiceImpl implements CartService{
         boolean itemExists = false;
 
         for (CartItems item : items) {
-            if (item.getProductId().equals(newItem.getProductId())) {
+            if (item.getId().equals(newItem.getId())) {
                 item.setQuantity(item.getQuantity() + newItem.getQuantity());
                 itemExists = true;
                 break;
