@@ -101,7 +101,7 @@ public class AdminServiceImpl implements AdminService {
     public void deleteProductById(String productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(()-> new InvalidProductException("Product not found"));
-        productRepository.deleteById(String.valueOf(product));
+        productRepository.deleteById(productId);
     }
 
     @Override
