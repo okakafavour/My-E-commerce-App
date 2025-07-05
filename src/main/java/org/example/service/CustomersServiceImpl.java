@@ -38,11 +38,6 @@ public class CustomersServiceImpl implements CustomersService{
     @Autowired
     CustomerRepository customerRepository;
 
-    @Override
-    public Customer findCustomerByEmail(String email) {
-        return customerRepository.findByEmail(email)
-                .orElseThrow(()-> new RuntimeException("customer not found"));
-    }
 
     @Override
     public void updateProfile(RegisterRequest request) {
@@ -120,7 +115,7 @@ public class CustomersServiceImpl implements CustomersService{
         Order order = new Order();
         order.setCustomerId(customerId);
         order.setItems(cartItems);
-        order.setTotalPrice(totalPrice);
+        order.setTotalAmount(totalPrice);
         order.setOrderDate(LocalDateTime.now());
         orderRepository.save(order);
 
@@ -137,7 +132,11 @@ public class CustomersServiceImpl implements CustomersService{
 
 
     @Override
-    public List<String> viewOrders(String userId) {
-        return List.of();
+    public List<Order> viewOrders(String customerId) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new InvalidCustomerException("customer not found"));
+
+        return orderRepository.findByCustomerId(customerId);
     }
+
 }
