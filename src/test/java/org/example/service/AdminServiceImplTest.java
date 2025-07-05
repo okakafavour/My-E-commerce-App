@@ -8,12 +8,10 @@ import org.example.data.repository.AdminRepository;
 import org.example.data.repository.UserRepository;
 import org.example.dto.request.AdminLoginRequest;
 import org.example.dto.request.AdminRegisterRequest;
-import org.example.dto.request.LoginRequest;
 import org.example.dto.response.AdminLoginResponse;
 import org.example.dto.response.AdminRegisterResponse;
-import org.example.dto.response.LoginResponse;
 import org.example.enums.Role;
-import org.example.util.PasswordHashingMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +31,12 @@ class AdminServiceImplTest {
 
     @Autowired
     UserRepository userRepository;
+
+    @BeforeEach
+    void setUP(){
+        adminRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
 
     @Test
@@ -57,10 +61,19 @@ class AdminServiceImplTest {
 
     @Test
     public void testToLoginAsAdmin(){
-        AdminLoginRequest request = new AdminLoginRequest();
+
+        AdminRegisterRequest request = new AdminRegisterRequest();
+        request.setFirstName("Admin");
+        request.setLastName("User");
         request.setEmail("admin12@gmail.com");
         request.setPassword("admin123");
-        AdminLoginResponse response =  adminService.login(request);
+        request.setPhoneNumber("08012345678");
+        adminService.register(request);
+
+        AdminLoginRequest adminLoginRequest = new AdminLoginRequest();
+        adminLoginRequest.setEmail("admin12@gmail.com");
+        adminLoginRequest.setPassword("admin123");
+        AdminLoginResponse response =  adminService.login(adminLoginRequest);
         assertEquals("Login Successfully", response.getMessage());
     }
 
@@ -74,7 +87,7 @@ class AdminServiceImplTest {
         request.setEnable(true);
         request.setPhoneNumber("08112345678");
         AdminRegisterResponse response = adminService.register(request);
-        assertEquals("Registered Successfully", response.getMessage());
+        assertEquals("Admin registered successfully", response.getMessage());
 
         AdminLoginRequest loginRequest = new AdminLoginRequest();
         loginRequest.setEmail("jide12@gmail.com");
@@ -116,6 +129,44 @@ class AdminServiceImplTest {
 
         List<User> users = adminService.getAllUsers("jide12@gmail.com");
         assertEquals(4, users.size());
+    }
 
+    @Test
+    public void testThatAdminCanDeleteAUser(){
+        AdminRegisterRequest request = new AdminRegisterRequest();
+        request.setFirstName("ThirdAdmin");
+        request.setLastName("jide");
+        request.setEmail("sam12@gmail.com");
+        request.setPassword("sam123");
+        request.setEnable(true);
+        request.setPhoneNumber("08112345678");
+        AdminRegisterResponse response = adminService.register(request);
+        assertEquals("Admin registered successfully", response.getMessage());
+
+        AdminLoginRequest loginRequest = new AdminLoginRequest();
+        loginRequest.setEmail("sam12@gmail.com");
+        loginRequest.setPassword("sam123");
+
+        AdminLoginResponse loginResponse = adminService.login(loginRequest);
+        assertEquals("Login Successfully", loginResponse.getMessage());
+
+        Customer user1 = new Customer();
+        user1.setEmail("user1@gmail.com");
+        user1.setPassword("password1");
+        user1.setFirstName("User ");
+        user1.setLastName("One");
+        user1.setRole(Role.CUSTOMER);
+        userRepository.save(user1);
+
+        Customer user2 = new Customer();
+        user2.setEmail("user2@gmail.com");
+        user2.setPassword("password2");
+        user2.setFirstName("User");
+        user2.setRole(Role.CUSTOMER);
+        user2.setLastName("Two");
+        userRepository.save(user2);
+
+        adminService.deleteUserByEmail("user2@gmail.com");
+        assertEquals(1, userRepository.count());
     }
 }
