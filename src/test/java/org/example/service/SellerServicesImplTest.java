@@ -29,6 +29,7 @@ class SellerServicesImplTest {
     @BeforeEach
     void setUp(){
         userRepository.deleteAll();
+        productRepository.deleteAll();
     }
 
     @Test
@@ -58,6 +59,34 @@ class SellerServicesImplTest {
         List<Product> allProducts = productRepository.findAll();
         assertEquals(1, allProducts.size());
         assertEquals("Phone", allProducts.get(0).getProductName());
+    }
+
+    @Test
+    public void testToRemoveAProduct(){
+
+        Seller seller = new Seller();
+        seller.setId("seller123");
+        seller.setFirstName("John");
+        seller.setLastName("Doe");
+        seller.setEmail("john@example.com");
+        seller.setPassword("password");
+        seller.setPhoneNumber("1234567890");
+        seller.setRole(Role.VENDOR);
+        userRepository.save(seller);
+
+
+        ProductRequest  productRequest = new ProductRequest();
+        productRequest.setName("Phone");
+        productRequest.setCategory("Electronics");
+        productRequest.setPrice(299.99);
+        productRequest.setQuantity(5);
+        productRequest.setDescription("Smartphone");
+        productRequest.setImageUrl("https://www.freepik.com/free-photo/elegant-smartphone-composition_27375319.htm#fromView=search&page=1&position=14&uuid=a6431bed-80c9-4c18-830b-0e1102344795&query=phone");
+        sellerServices.addProduct(productRequest, seller.getId());
+
+        sellerServices.removeProduct("Phone", seller.getId());
+        List<Product> allProducts = productRepository.findAll();
+        assertEquals(0, allProducts.size());
     }
 }
 

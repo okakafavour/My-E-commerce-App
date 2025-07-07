@@ -9,6 +9,7 @@ public class validations {
         return phoneNumber;
     }
 
+
     public static String validateEmail(String email){
       if(!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")) throw new InvalidEmailException("Invalid email");
        return email;

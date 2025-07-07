@@ -45,12 +45,13 @@ public class SellerServicesImpl implements SellerServices{
         product.setDescription(productRequest.getDescription());
         product.setImageUrl(productRequest.getImageUrl());
         product.setAvailable(true);
+        product.setSellerId(sellerId);
         productRepository.save(product);
     }
 
     @Override
-    public void removeProduct(String productId) {
-        Product product = productRepository.findById(productId)
+    public void removeProduct(String productName, String sellerId) {
+        Product product = productRepository.findByProductNameAndSellerId(productName, sellerId)
                 .orElseThrow(()-> new ProductNotFoundException("product not found"));
         productRepository.delete(product);
     }

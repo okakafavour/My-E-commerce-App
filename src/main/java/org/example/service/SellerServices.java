@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface SellerServices {
     void addProduct(ProductRequest productRequest, String sellerId);
-    void removeProduct(String productId);
+    void removeProduct(String productId, String sellerId    );
     Product updateProduct(String productId, ProductRequest productRequest);
     List<Product> viewMyProducts(String sellerId);
     void changeProductAvailability(String productId, boolean available);

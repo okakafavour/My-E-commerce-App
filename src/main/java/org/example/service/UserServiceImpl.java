@@ -9,6 +9,7 @@ import org.example.dto.response.RegisterResponse;
 import org.example.exception.InvalidPasswordException;
 import org.example.exception.InvalidUserException;
 import org.example.exception.UserNotFoundException;
+import org.example.util.JwtUtil;
 import org.example.util.Mapper;
 import org.example.util.PasswordHashingMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,10 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Autowired
-    private Mapper mapper;
+     Mapper mapper;
+
+    @Autowired
+    JwtUtil jwtUtil;
 
     public RegisterResponse register(RegisterRequest request) {
         String validPhoneNumber = validatePhoneNumber(request.getPhoneNumber());
@@ -42,7 +46,7 @@ public class UserServiceImpl implements UserService {
         if (exitingUser.isPresent()) throw new InvalidUserException("User already exists");
 
         User user = mapper.mapToUser(request);
-        user.setRole(request.getRole()); // Set the role dynamically
+        user.setRole(request.getRole());
         String hashedPassword = PasswordHashingMapper.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
 
@@ -58,9 +62,11 @@ public class UserServiceImpl implements UserService {
         boolean passwordMatch = PasswordHashingMapper.checkPassword(request.getPassword(), user.getPassword());
         if (!passwordMatch) throw new InvalidPasswordException("Invalid password");
 
+        String token = jwtUtil.generateToken(user.getEmail());
+
         LoginResponse response = new LoginResponse();
         response.setMessage("Login Successfully");
-        // Add token if you're using JWT
+        response.setToken(token);
         return response;
     }
 }
