@@ -9,4 +9,6 @@ public class ProductRequest {
     private int quantity;
     private double price;
     private String category;
+    private String imageUrl;
+
 }

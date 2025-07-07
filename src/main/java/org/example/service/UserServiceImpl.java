@@ -19,16 +19,15 @@ import java.util.Optional;
 import static org.example.validation.validations.*;
 
 @Service
-public class UserServiceImpl implements UserService{
-    @Autowired
-    private UserRepository userRepository;
+public class UserServiceImpl implements UserService {
 
     @Autowired
-    Mapper mapper;
+    UserRepository userRepository;
 
+    @Autowired
+    private Mapper mapper;
 
     public RegisterResponse register(RegisterRequest request) {
-
         String validPhoneNumber = validatePhoneNumber(request.getPhoneNumber());
         String validFirstName = validateName(request.getFirstName());
         String validEmail = validateEmail(request.getEmail());
@@ -40,12 +39,15 @@ public class UserServiceImpl implements UserService{
         request.setLastName(validLastName);
 
         Optional<User> exitingUser = userRepository.findByEmail(request.getEmail());
-        if(exitingUser.isPresent()) throw new InvalidUserException("User already exist");
+        if (exitingUser.isPresent()) throw new InvalidUserException("User already exists");
 
         User user = mapper.mapToUser(request);
+        user.setRole(request.getRole()); // Set the role dynamically
         String hashedPassword = PasswordHashingMapper.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
+
         userRepository.save(user);
+
         return mapper.mapToRegisterResponse(user);
     }
 
@@ -58,8 +60,7 @@ public class UserServiceImpl implements UserService{
 
         LoginResponse response = new LoginResponse();
         response.setMessage("Login Successfully");
+        // Add token if you're using JWT
         return response;
     }
-
-
 }

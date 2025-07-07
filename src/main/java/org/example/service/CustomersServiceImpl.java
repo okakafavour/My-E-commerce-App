@@ -6,9 +6,12 @@ import org.example.data.repository.CustomerRepository;
 import org.example.data.repository.OrderRepository;
 import org.example.data.repository.UserRepository;
 import org.example.dto.request.CartRequest;
+import org.example.dto.request.LoginRequest;
 import org.example.dto.request.RegisterRequest;
 import org.example.dto.response.CartResponse;
+import org.example.dto.response.LoginResponse;
 import org.example.dto.response.OrderResponse;
+import org.example.dto.response.RegisterResponse;
 import org.example.exception.InvalidCustomerException;
 import org.example.exception.UserNotFoundException;
 import org.example.util.Mapper;
@@ -138,5 +141,6 @@ public class CustomersServiceImpl implements CustomersService{
 
         return orderRepository.findByCustomerId(customerId);
     }
+
 
 }

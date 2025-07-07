@@ -52,7 +52,6 @@ public class Mapper {
         CartResponse cartResponse = new CartResponse();
         cartResponse.setUserId(cart.getUserId());
 
-        // Convert List<CartItems> to List<Item> if types differ
         List<Item> itemList = cart.getItems().stream().map(cartItem -> {
             Item item = new Item();
             item.setId(cartItem.getId());

@@ -16,4 +16,6 @@ public class Product {
     private double price;
     private String imageUrl;
     private String sellerId;
+    private boolean available;
+
 }

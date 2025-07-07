@@ -15,6 +15,7 @@ import java.util.List;
 @Document(collection = "order")
 public class Order {
     private String id;
+    private Product product;
     private String customerId;
     private List<Item> items;
     private double totalAmount;
