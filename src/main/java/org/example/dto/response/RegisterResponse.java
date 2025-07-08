@@ -7,4 +7,5 @@ import org.example.enums.Role;
 public class RegisterResponse {
     private String message;
     private Role role;
+
 }

@@ -1,10 +1,7 @@
 package org.example.service;
 
 import org.example.data.model.*;
-import org.example.data.repository.CartRepository;
-import org.example.data.repository.CustomerRepository;
-import org.example.data.repository.OrderRepository;
-import org.example.data.repository.UserRepository;
+import org.example.data.repository.*;
 import org.example.dto.request.CartRequest;
 import org.example.dto.request.LoginRequest;
 import org.example.dto.request.RegisterRequest;
@@ -12,6 +9,7 @@ import org.example.dto.response.CartResponse;
 import org.example.dto.response.LoginResponse;
 import org.example.dto.response.OrderResponse;
 import org.example.dto.response.RegisterResponse;
+import org.example.enums.Status;
 import org.example.exception.InvalidCustomerException;
 import org.example.exception.UserNotFoundException;
 import org.example.util.Mapper;
@@ -41,6 +39,9 @@ public class CustomersServiceImpl implements CustomersService{
     @Autowired
     CustomerRepository customerRepository;
 
+    @Autowired
+    ProductRepository productRepository;
+
 
     @Override
     public void updateProfile(RegisterRequest request) {
@@ -50,20 +51,33 @@ public class CustomersServiceImpl implements CustomersService{
         if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
         if (request.getLastName() != null) user.setLastName(request.getLastName());
         if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
+
         userRepository.save(user);
     }
 
-
     public CartResponse addToCart(CartRequest request) {
-        CartItems item = Mapper.mapToCartItems(request);
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        Item item = new Item();
+        item.setDescription(product.getDescription());
+        item.setPrice(product.getPrice());
+        item.setQuantity(request.getQuantity());
+        item.setStatus(Status.AVAILABLE);
+
+        CartItems cartItem = new CartItems();
+        cartItem.setProductName(product.getProductName());
+        cartItem.setItemDetails(item);
 
         Cart cart = new Cart();
         cart.setUserId(request.getUserId());
-        cart.setItems(List.of(item));
-        cart.setTotalPrice(item.getItemDetails().getPrice() * item.getItemDetails().getQuantity());
+        cart.setItems(List.of(cartItem));
+        cart.setTotalPrice(product.getPrice() * request.getQuantity());
+
         cartRepository.save(cart);
         return Mapper.mapToCartItemsResponse(cart);
     }
+
 
 
     @Override

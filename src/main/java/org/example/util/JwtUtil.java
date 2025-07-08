@@ -12,7 +12,7 @@ import java.util.Date;
 @Service
 public class JwtUtil {
     private static final String SECRET_KEY = "mySuperSecureSecretKey123456789!";
-    private static final long EXPIRATION_TIME = 100 * 60 * 6;
+    private static final long EXPIRATION_TIME = 24 * 60 * 60 * 1000;
 
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 

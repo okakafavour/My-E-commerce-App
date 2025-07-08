@@ -4,12 +4,7 @@ import org.example.data.model.Order;
 import org.example.data.model.Product;
 import org.example.data.repository.OrderRepository;
 import org.example.data.repository.ProductRepository;
-import org.example.dto.request.LoginRequest;
 import org.example.dto.request.ProductRequest;
-import org.example.dto.request.RegisterRequest;
-import org.example.dto.response.LoginResponse;
-import org.example.dto.response.RegisterResponse;
-import org.example.enums.Role;
 import org.example.service.SellerServicesImpl;
 import org.example.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/seller")
 @CrossOrigin(origins = "*")
-@PreAuthorize("hasRole('SELLER')")
+@PreAuthorize("hasRole('VENDOR')")
     public class SellerController {
 
     @Autowired
@@ -37,19 +32,10 @@ import java.util.List;
     @Autowired
     SellerServicesImpl sellerServices;
 
-    @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> registerSeller(@RequestBody RegisterRequest request) {
-        request.setRole(Role.VENDOR);
-        return ResponseEntity.ok(userService.register(request));
-    }
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginSeller(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(userService.login(request));
-    }
 
     @PostMapping("/add-product")
-    public ResponseEntity<?> addProduct(Product product) {
+    public ResponseEntity<?> addProduct(@RequestBody Product product) {
         Product addedProduct = productRepository.save(product);
             return ResponseEntity.ok(addedProduct);
     }

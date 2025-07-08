@@ -3,6 +3,7 @@ package org.example.data.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.enums.Status;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
@@ -19,5 +20,6 @@ public class Product {
     private String imageUrl;
     private String sellerId;
     private boolean available;
+    private Status status;
 
 }

@@ -34,15 +34,16 @@ public class Mapper {
         return response;
     }
 
-    public static CartItems mapToCartItems(CartRequest request) {
+    public static CartItems mapToCartItems(CartRequest request, Product product) {
         CartItems cartItems = new CartItems();
-        cartItems.setProductName(request.getProductName());
+        cartItems.setProductName(product.getProductName());
 
         Item item = new Item();
-        item.setDescription(request.getDescription());
-        item.setPrice(request.getPrice());
+        item.setId(product.getId());
+        item.setDescription(product.getDescription());
+        item.setPrice(product.getPrice());
         item.setQuantity(request.getQuantity());
-        item.setStatus(Status.AVAILABLE);
+        item.setStatus(product.getStatus());
 
         cartItems.setItemDetails(item);
         return cartItems;
@@ -54,11 +55,12 @@ public class Mapper {
 
         List<Item> itemList = cart.getItems().stream().map(cartItem -> {
             Item item = new Item();
-            item.setId(cartItem.getId());
-            item.setDescription(cartItem.getDescription());
-            item.setPrice(cartItem.getPrice());
-            item.setQuantity(cartItem.getQuantity());
-            item.setStatus(cartItem.getStatus());
+            item.setId(cartItem.getItemDetails().getId());
+            item.setDescription(cartItem.getItemDetails().getDescription());
+            item.setPrice(cartItem.getItemDetails().getPrice());
+            item.setQuantity(cartItem.getItemDetails().getQuantity());
+            item.setStatus(cartItem.getItemDetails().getStatus());
+            item.setProductName(cartItem.getProductName());
             return item;
         }).collect(Collectors.toList());
 
