@@ -70,12 +70,25 @@ public class CustomersServiceImpl implements CustomersService{
         cartItem.setItemDetails(item);
 
         Cart cart = new Cart();
-        cart.setUserId(request.getUserId());
+        cart.setUserId(request.getCustomerId());
         cart.setItems(List.of(cartItem));
         cart.setTotalPrice(product.getPrice() * request.getQuantity());
 
-        cartRepository.save(cart);
-        return Mapper.mapToCartItemsResponse(cart);
+        Cart savedCart = cartRepository.save(cart);
+
+        Customer customer = customerRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new InvalidCustomerException("Customer not found"));
+
+        String existingCartIds = customer.getCartId();
+        if (existingCartIds == null || existingCartIds.isEmpty()) {
+            customer.setCartId(savedCart.getId());
+        } else {
+            customer.setCartId(existingCartIds + "," + savedCart.getId());
+        }
+
+        customerRepository.save(customer);
+
+        return Mapper.mapToCartItemsResponse(savedCart);
     }
 
 
@@ -107,42 +120,72 @@ public class CustomersServiceImpl implements CustomersService{
     }
 
     @Override
-    public List<String> viewCart(String customerId) {
+    public List<CartResponse> viewCart(String customerId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(()-> new InvalidCustomerException("customer not found"));
+                .orElseThrow(() -> new InvalidCustomerException("Customer not found"));
 
-        boolean emptyCart = customer.getCartId() == null || customer.getCartId().isEmpty();
-        if(emptyCart) return new ArrayList<>();
+        if (customer.getCartId() == null || customer.getCartId().isEmpty()) {
+            return new ArrayList<>();
+        }
 
-        return new ArrayList<>(List.of(customer.getCartId().split(",")));
+        List<CartResponse> cartResponses = new ArrayList<>();
+
+        String[] cartIds = customer.getCartId().split(",");
+        for (String cartId : cartIds) {
+            cartRepository.findById(cartId).ifPresent(cart -> {
+                CartResponse response = Mapper.mapToCartItemsResponse(cart);
+                cartResponses.add(response);
+            });
+        }
+
+        return cartResponses;
     }
+
 
     @Override
     public OrderResponse placeOrder(String customerId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(()-> new InvalidCustomerException("customer not found"));
+                .orElseThrow(() -> new InvalidCustomerException("Customer not found"));
 
-        List<Item> cartItems = customer.getCartItems();
-        if(cartItems.isEmpty()) throw new IllegalArgumentException("cart is empty");
+        String cartIdString = customer.getCartId();
+        if (cartIdString == null || cartIdString.isEmpty()) {
+            throw new IllegalArgumentException("Cart is empty");
+        }
 
-        double totalPrice = cartItems.stream()
+        List<String> cartIds = List.of(cartIdString.split(","));
+        List<Cart> carts = cartRepository.findAllById(cartIds);
+
+        List<Item> allItems = new ArrayList<>();
+        for (Cart cart : carts) {
+            for (CartItems cartItem : cart.getItems()) {
+                allItems.add(cartItem.getItemDetails());
+            }
+        }
+
+        if (allItems.isEmpty()) {
+            throw new IllegalArgumentException("Cart is empty");
+        }
+
+        double totalPrice = allItems.stream()
                 .mapToDouble(Item::getTotalPrice)
                 .sum();
 
         Order order = new Order();
         order.setCustomerId(customerId);
-        order.setItems(cartItems);
+        order.setItems(allItems);
         order.setTotalAmount(totalPrice);
         order.setOrderDate(LocalDateTime.now());
         orderRepository.save(order);
 
-        customer.setCartItems(new ArrayList<>());
+        customer.setCartId(null);
         customerRepository.save(customer);
+
+        cartRepository.deleteAll(carts);
 
         OrderResponse response = new OrderResponse();
         response.setOrderId(order.getId());
         response.setTotalPrice(totalPrice);
-        response.setItemCount(cartItems.size());
+        response.setItemCount(allItems.size());
         response.setOrderDate(order.getOrderDate());
         return response;
     }

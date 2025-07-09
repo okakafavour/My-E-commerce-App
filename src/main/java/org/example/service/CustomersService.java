@@ -13,7 +13,7 @@ public interface CustomersService {
     void updateProfile(RegisterRequest request);
     CartResponse addToCart(CartRequest request);
     CartResponse removeFromCart(String userId, String productId);
-    List<String> viewCart(String userId);
+    List<CartResponse> viewCart(String userId);
     OrderResponse placeOrder(String customerId);
     List<Order> viewOrders(String customerId);
 

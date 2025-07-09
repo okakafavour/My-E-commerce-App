@@ -3,13 +3,9 @@ package org.example.controller;
 import org.example.data.model.Order;
 import org.example.data.repository.CartRepository;
 import org.example.dto.request.CartRequest;
-import org.example.dto.request.LoginRequest;
 import org.example.dto.request.RegisterRequest;
 import org.example.dto.response.CartResponse;
-import org.example.dto.response.LoginResponse;
 import org.example.dto.response.OrderResponse;
-import org.example.dto.response.RegisterResponse;
-import org.example.enums.Role;
 import org.example.service.CustomersServiceImpl;
 import org.example.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,54 +21,71 @@ import java.util.List;
 public class CustomerController {
 
     @Autowired
-    UserServiceImpl userService;
+    private UserServiceImpl userService;
 
     @Autowired
-    CustomersServiceImpl customersService;
+    private CustomersServiceImpl customersService;
 
     @Autowired
-    CartRepository cartRepository;
-
+    private CartRepository cartRepository;
 
     @PutMapping("/update-profile")
-    public ResponseEntity<String> updateProfile(@RequestBody RegisterRequest request) {
-        customersService.updateProfile(request);
-        return ResponseEntity.ok("Profile updated successfully");
+    public ResponseEntity<?> updateProfile(@RequestBody RegisterRequest request) {
+        try {
+            customersService.updateProfile(request);
+            return ResponseEntity.ok("Profile updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating profile: " + e.getMessage());
+        }
     }
-
 
     @PostMapping("/add-to-cart")
-    public ResponseEntity<CartResponse> addToCart(@RequestBody CartRequest request) {
-        CartResponse response = customersService.addToCart(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> addToCart(@RequestBody CartRequest request) {
+        try {
+            CartResponse response = customersService.addToCart(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error adding to cart: " + e.getMessage());
+        }
     }
-
 
     @PostMapping("/place-order/{customerId}")
-    public ResponseEntity<OrderResponse> placeOrder(@PathVariable String customerId) {
-        OrderResponse response = customersService.placeOrder(customerId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> placeOrder(@PathVariable("customerId") String customerId) {
+        try {
+            OrderResponse response = customersService.placeOrder(customerId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error placing order: " + e.getMessage());
+        }
     }
 
-
     @DeleteMapping("/remove-from-cart/{customerId}/{productId}")
-    public ResponseEntity<CartResponse> removeFromCart(@PathVariable String customerId, @PathVariable String productId){
-        CartResponse response = customersService.removeFromCart(customerId, productId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> removeFromCart(@PathVariable String customerId, @PathVariable String productId) {
+        try {
+            CartResponse response = customersService.removeFromCart(customerId, productId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error removing from cart: " + e.getMessage());
+        }
     }
 
     @GetMapping("/view-cart/{customerId}")
-    public ResponseEntity<List<String>> viewCart(@PathVariable String customerId){
-        List<String> cartItems = customersService.viewCart(customerId);
-        return ResponseEntity.ok(cartItems);
+    public ResponseEntity<?> viewCart(@PathVariable("customerId") String customerId) {
+        try {
+            List<CartResponse> cartItems = customersService.viewCart(customerId);
+            return ResponseEntity.ok(cartItems);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error viewing cart: " + e.getMessage());
+        }
     }
 
     @GetMapping("/view-orders/{customerId}")
-    public ResponseEntity<List<Order>> viewOrders(@PathVariable String customerId){
-        List<Order> orders = customersService.viewOrders(customerId);
-        return ResponseEntity.ok(orders);
+    public ResponseEntity<?> viewOrders(@PathVariable("customerId") String customerId) {
+        try {
+            List<Order> orders = customersService.viewOrders(customerId);
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error viewing orders: " + e.getMessage());
+        }
     }
-
 }
-
-

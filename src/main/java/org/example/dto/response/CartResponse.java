@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 public class CartResponse {
-    private String userId;
+    private String customerId;
     private List<Item> items;
     private double totalPrice;
 }

@@ -51,7 +51,7 @@ public class Mapper {
 
     public static CartResponse mapToCartItemsResponse(Cart cart) {
         CartResponse cartResponse = new CartResponse();
-        cartResponse.setUserId(cart.getUserId());
+        cartResponse.setCustomerId(cart.getUserId());
 
         List<Item> itemList = cart.getItems().stream().map(cartItem -> {
             Item item = new Item();
